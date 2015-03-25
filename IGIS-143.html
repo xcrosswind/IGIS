@@ -46,7 +46,6 @@ html, #map {
                 , "esri/symbols/SimpleFillSymbol"
                 , "esri/renderers/SimpleRenderer"
                 , "esri/Color"
-
                  
                 , "esri/geometry/Point"
                 , "esri/geometry/webMercatorUtils"
@@ -75,7 +74,7 @@ html, #map {
                 , SimpleFillSymbol
                 , SimpleRenderer
                 , Color
-
+                
                 , Point
                 , webMercatorUtils
                 , FeatureSet
@@ -99,36 +98,34 @@ html, #map {
                 //add the points in on demand mode. Note that an info template has been defined so when
                 //selected features are clicked a popup window will appear displaying the content defined in the info template.
                 var featureLayer = new FeatureLayer(
-                        "https://stgeo01/arcgis/rest/services//Indigo/v_gis_station_selex/MapServer/0",
-                        {  outFields : [ "user_id", "active_guid","stat_id",
-                                    "stat_code", "stat_name","offerer_id", "region_id", 
-                                    "ground_level", "cell_types", "offerer_type", "services", "supplies",  "position_longitude", "position_latitude" ]
+                        "https://stgeo01/arcgis/rest/services/Indigo/IGIS_V_GIS_STATION2_WGS84N/MapServer/0",
+                        {  outFields : ["STAT_ID", "STAT_CODE", "STAT_NAME","OFFERER_ID", "LON", "LAT", "REGION_ID", 
+                                    "GROUND_LEVEL", "CREA_DATE", "OFFERER_TYPE", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ]
                         });
                  
                 // könnte auch RelationshipQuery sein... das muss ich noch genauer untersuchen
        
                 //build query filter
-                var queryTask = new QueryTask("https://stgeo01/arcgis/rest/services//Indigo/v_gis_station_selex/MapServer/0");
+                var queryTask = new QueryTask("https://stgeo01/arcgis/rest/services/Indigo/IGIS_V_GIS_STATION2_WGS84N/MapServer/0");
 
                 var query = new Query();
                 query.returnGeometry = true;
-                query.outFields = [ "user_id", "active_guid", "stat_code",
-                        "stat_name", "services", "position_longitude", "position_latitude"];
+                query.outFields = ["STAT_ID", "STAT_CODE", "STAT_NAME","OFFERER_ID", "LON", "LAT", "REGION_ID", 
+                                    "GROUND_LEVEL", "CREA_DATE", "OFFERER_TYPE", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ];
        
                 // Die URL liefert die user_id und die active_guid. Damit können die beiden Parameter aus der URL ausgelesen werden.
                 // das Package esri/urlUtils muss als erstes aufgeführt werden. Warum ist unklar.
                 // !!! Besser wäre, wenn nur die wirklich benötigten Punkte geladen würden, anstelle von alles laden und nur die benötigten darstellen...
                 var url = document.location.href;
                 var myObject = urlUtils.urlToObject(url);
+                
+                
                              
-                // ?user_id=251&active_guid=guid1&stat_code=BELB
-                query.where = "user_id = " 
-                        + myObject.query['user_id']
-                        + " AND active_guid = '"
-                        + myObject.query['active_guid'] 
-                        + "' AND stat_code = '"
-                        + myObject.query['stat_code']                         // Bsp. BELB, BEEL
-                        + "'";  
+                // ?stat_code=BELB  
+                  query.where = "stat_code = '"
+                        + myObject.query['STAT_CODE']                         // Bsp. BELB, BEEL
+                        + "'";
+  
   
                 queryTask.execute(query, showResults); 
 
@@ -138,11 +135,20 @@ html, #map {
                             });
                                                      
                     // identifiziere die Koordinaten aus dem Objekt
-                    var pos_long = featureSet.features[0].attributes.position_longitude;
-                    var pos_lat = featureSet.features[0].attributes.position_latitude;
+                    var pos_long = featureSet.features[0].attributes.LON;
+                    var pos_lat = featureSet.features[0].attributes.LAT;
                     
-                    // center und zoome auf diese Koordinaten
-                    map.centerAndZoom(new Point(pos_long, pos_lat), 16);   // welche Zoomstufe sinnvoll ist, muss noch mit den Anwendern diskutiert werden
+                    console.log(pos_long);
+                    console.log(pos_lat);
+                    
+               //      var pos_long = 7.451;
+               //     var pos_lat = 46.957;
+                    
+    
+                    
+     
+      //      map.centerAndZoom(new Point(pos_long, pos_lat), 16);   // welche Zoomstufe sinnvoll ist, muss noch mit den Anwendern diskutiert werden
+                    
                             
                 }          
                 
