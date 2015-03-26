@@ -93,12 +93,11 @@ body {
         
         // Die URL liefert die user_id und die active_guid. Damit können die beiden Parameter aus der URL ausgelesen werden.
         // das Package esri/urlUtils muss als erstes aufgeführt werden. Warum ist unklar.
-                var url = document.location.href;
-                var myObject = urlUtils.urlToObject(url);
+                var url = urlUtils.urlToObject(document.location.href);
 
-                query.where = "user_id = " + myObject.query['user_id']
+                query.where = "user_id = " + url.query['user_id']
                         + " AND active_guid = '"
-                        + myObject.query['active_guid'] + "'"; // hier SQL WHERE Clause definieren
+                        + url.query['active_guid'] + "'"; // hier SQL WHERE Clause definieren
 
                 queryTask.execute(query, initResults);
 
