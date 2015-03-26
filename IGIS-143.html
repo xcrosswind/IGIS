@@ -112,17 +112,18 @@ html, #map {
 
                 var query = new Query();
                 query.returnGeometry = true;
-                query.outFields = ["STAT_ID", "STAT_CODE", "STAT_NAME","OFFERER_ID", "LON", "LAT", "REGION_ID", 
-                                    "GROUND_LEVEL", "CREA_DATE", "OFFERER_TYPE", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ];
+        
+              query.outFields = ["STAT_ID", "STAT_CODE", "LON", "LAT" ];
+       
        
                 // das Package esri/urlUtils muss als erstes aufgeführt werden. Warum ist unklar.
                 // !!! Besser wäre, wenn nur die wirklich benötigten Punkte geladen würden, anstelle von alles laden und nur die benötigten darstellen...
                 var url = urlUtils.urlToObject(document.location.href);
                          
-                // URL: ?stat_code=BELB oder ?stat_code=BEEL
+                // URL: ?stat_id=329734 oder ?stat_id=423013
                 // Attribut: GROSSBUCHSTABEN; URL: kleinbuchstaben
-                  query.where = "STAT_CODE = '"
-                        + url.query['stat_code']
+                  query.where = "STAT_ID = '"
+                        + url.query['stat_id']
                         + "'";
 
                 // Mit setDefinitionExpression wird erreicht, dass nur Objekte geladen werden, die auch wirklich benötigt werden. 
@@ -135,7 +136,6 @@ html, #map {
                     featureLayer.selectFeatures(query,
                             FeatureLayer.SELECTION_NEW, function(featureSet) {
                             });
-   
                     // pan and zoom to object
                     // identifiziere die Koordinaten aus dem Objekt
                     var pos_long = featureSet.features[0].attributes.LON;
