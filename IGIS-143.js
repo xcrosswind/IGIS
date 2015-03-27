@@ -2,6 +2,8 @@
  * IGIS-143 -  in der Indigo GUI-Detailansicht eines Standortes dessen Position auf einer Karte sehen (Ptyp)
  */
 
+
+
 var map;
     
 require([ 
@@ -49,6 +51,7 @@ require([
   , on
   , parser
 ) {
+  'use strict';
   parser.parse();
 
   // create map 
@@ -81,23 +84,24 @@ require([
   
   // URL: ?stat_id=329734 oder ?stat_id=423013
   // Attribut: GROSSBUCHSTABEN; URL: kleinbuchstaben
-  query.where = "STAT_ID = '" + url.query['stat_id'] + "'";
+  query.where = "STAT_ID = '" + url.stat_id + "'";
 
   // Mit setDefinitionExpression wird erreicht, dass nur Objekte geladen werden, die auch wirklich benötigt werden. 
   // In diesem Fall nur Objekte, die in der URL explizit genannt werden.
   featureLayer.setDefinitionExpression(query.where);
   
-  queryTask.execute(query, showResults); 
-
+  
   function showResults(featureSet) {               // FeatureSet
     featureLayer.selectFeatures(query,
       FeatureLayer.SELECTION_NEW, function(featureSet) {
     });
+    
+  queryTask.execute(query, showResults); 
 
     // pan and zoom to object
     // identifiziere die Koordinaten aus dem Objekt
-    var pos_long = featureSet.features[0].attributes.LON;
-    var pos_lat = featureSet.features[0].attributes.LAT;
+    var pos_long = featureSet.features[0].attributes.LON,
+      pos_lat = featureSet.features[0].attributes.LAT;
 
     map.centerAndZoom(new Point(pos_long, pos_lat), 16);   // welche Zoomstufe sinnvoll ist, muss noch mit den Anwendern diskutiert werden
 
