@@ -2,8 +2,6 @@
  * IGIS-143 -  in der Indigo GUI-Detailansicht eines Standortes dessen Position auf einer Karte sehen (Ptyp)
  */
 
-
-
 var map;
     
 require([ 
@@ -78,29 +76,28 @@ require([
   query.returnGeometry = true;
   query.outFields = ["STAT_ID", "STAT_CODE", "LON", "LAT" ];
   
-  // das Package esri/urlUtils muss als erstes aufgef√ºhrt werden. Warum ist unklar.
-  // !!! Besser w√§re, wenn nur die wirklich ben√∂tigten Punkte geladen w√ºrden, anstelle von alles laden und nur die ben√∂tigten darstellen...
+  // das Package esri/urlUtils muss als erstes aufgeführt werden. Warum ist unklar.
+  // !!! Besser wäre, wenn nur die wirklich benötigten Punkte geladen würden, anstelle von alles laden und nur die benötigten darstellen...
   var url = urlUtils.urlToObject(document.location.href);
   
   // URL: ?stat_id=329734 oder ?stat_id=423013
   // Attribut: GROSSBUCHSTABEN; URL: kleinbuchstaben
-  query.where = "STAT_ID = '" + url.stat_id + "'";
+  query.where = "STAT_ID = '" + url.query.stat_id + "'";   
 
-  // Mit setDefinitionExpression wird erreicht, dass nur Objekte geladen werden, die auch wirklich ben√∂tigt werden. 
+  // Mit setDefinitionExpression wird erreicht, dass nur Objekte geladen werden, die auch wirklich benötigt werden. 
   // In diesem Fall nur Objekte, die in der URL explizit genannt werden.
   featureLayer.setDefinitionExpression(query.where);
   
-  
+  queryTask.execute(query, showResults); 
+
   function showResults(featureSet) {               // FeatureSet
     featureLayer.selectFeatures(query,
       FeatureLayer.SELECTION_NEW, function(featureSet) {
     });
-    
-  queryTask.execute(query, showResults); 
 
     // pan and zoom to object
     // identifiziere die Koordinaten aus dem Objekt
-    var pos_long = featureSet.features[0].attributes.LON,
+    var pos_long = featureSet.features[0].attributes.LON, 
       pos_lat = featureSet.features[0].attributes.LAT;
 
     map.centerAndZoom(new Point(pos_long, pos_lat), 16);   // welche Zoomstufe sinnvoll ist, muss noch mit den Anwendern diskutiert werden
