@@ -1,6 +1,6 @@
 /*
- * IGIS-9 die Suchresultate der Indigo-Standortsuche im GIS sehen (Ptyp)
- * Tobias
+ * IGIS-22 Antennenstandorte mittels Freitextsuche und Radius selektieren (Ptyp)
+ * 
  */
 
 var map;
@@ -11,6 +11,8 @@ require([
   , "esri/layers/FeatureLayer"
   , "esri/tasks/query"
   , "esri/tasks/QueryTask"
+  , "esri/layers/TableDataSource"
+  , "esri/layers/LayerDataSource"
   , "esri/geometry/Geometry"
   , "esri/geometry/Circle"
   , "esri/graphic"
@@ -32,6 +34,8 @@ require([
   , FeatureLayer
   , Query
   , QueryTask
+  , TableDataSource
+  , LayerDataSource
   , Geometry
   , Circle
   , Graphic
@@ -55,7 +59,7 @@ map = new Map("mapDiv", {
   basemap : "streets",
   slider : true
 });
-                
+
                 
 var mapServiceUrl = "https://stgeo01/arcgis/rest/services/IGIS/IGIS_Sites_Userselection/MapServer/0";
 
@@ -68,6 +72,29 @@ var featureLayer = new FeatureLayer(
     outFields : [ "USER_ID", "ACTIVE_GUID", "STAT_ID", "STAT_CODE",
         "STAT_NAME", "LON", "LAT", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ]
   });
+  
+  
+  
+  
+var dataSource = new TableDataSource();
+dataSource.workspaceId = "D148SHG_APP_ARCGIS";
+dataSource.dataSourceName = "sTgpdb01.BTO_SHOGUN.X_SELEXDATA";
+var layerSource = new LayerDataSource();
+layerSource.dataSource = dataSource;
+
+var featureLayer2 = new FeatureLayer("https://stgeo01/arcgis/rest/services/IGIS/IGIS_Sites_Userselection/dynamicLayer", {
+  
+ // "http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer/dynamicLayer", {
+          mode: FeatureLayer.MODE_ONDEMAND,
+          outFields: ["SELEX_ID", "OBJ_ID"],
+     //     infoTemplate: infoTemplate,
+          source: layerSource
+        });
+
+
+
+console.log(layerSource.toJson());
+
 
 var queryTask = new QueryTask(mapServiceUrl);
 //build query filter
@@ -117,17 +144,7 @@ queryTask.execute(query, showResults);
                               
     map.centerAndZoom(new Point(median(longs), median(lats)), 15);
                                
-    // selection symbol used to draw the selected points within the buffer polygon
-    var symbol = new SimpleMarkerSymbol(
-      SimpleMarkerSymbol.STYLE_CIRCLE, 14,
-      new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL,
-        new Color([ 247, 34, 101, 0.9 ]), 1),
-          new Color([ 255, 0, 0, 0.3 ]));
-        featureLayer.setSelectionSymbol(symbol);
-                  
-        //make unselected features invisible
-        var nullSymbol = new SimpleMarkerSymbol().setSize(0);
-          featureLayer.setRenderer(new SimpleRenderer(nullSymbol));
+ 
    
     map.addLayer(featureLayer);
   }
