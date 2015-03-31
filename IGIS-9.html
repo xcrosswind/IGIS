@@ -7,13 +7,11 @@
 <meta name="viewport"
     content="initial-scale=1, maximum-scale=1,user-scalable=no">
 <title>Indigo GIS</title>
-<link rel="stylesheet"
-    href="https://js.arcgis.com/3.13/dijit/themes/tundra/tundra.css">
-<link rel="stylesheet"
-    href="https://js.arcgis.com/3.13/esri/css/esri.css">
+<link rel="stylesheet" href="https://js.arcgis.com/3.13/dijit/themes/tundra/tundra.css">
+<link rel="stylesheet" href="https://js.arcgis.com/3.13/esri/css/esri.css">
 <!-- fŸr Map -->
 <style>
-html, body, #map, #mapDiv, .map.container {
+html, body, #map, .map.container {
     height: 100%;
     width: 100%;
     margin: 0;
@@ -45,12 +43,43 @@ body {
     top: 20px;
     z-index: 40;
 }
+#search {
+         display: block;
+         position: absolute;
+         z-index: 2;
+         top: 20px;
+         left: 74px;
+}
+
+#basemapGallery {
+         display: block;
+         position: absolute;
+         z-index: 2;
+         top: 20px;
+         right: 20px;
+}
+
+
 </style>
 <script src="https://js.arcgis.com/3.13/"></script>
 <script type="text/javascript" src="IGIS-9.js"></script>
 
 </head>
 <body>
-    <div id="mapDiv"></div>
+    <div id="search"></div>
+    <div id="map"></div>
+
+    
+    <div style="position:absolute; right:20px; top:10px; z-Index:999;">
+      <div data-dojo-type="dijit/TitlePane" 
+             data-dojo-props="title:'Switch Basemap', closable:false, open:false">
+          <div data-dojo-type="dijit/layout/ContentPane" style="width:380px; height:280px; overflow:auto;">
+            <div id="basemapGallery"></div>
+          </div>
+        </div>
+      </div>
+    
+    
+    
 </body>
 </html>

@@ -156,18 +156,16 @@ body {
                 s.startup();
                 
     
-    
+                var mapServiceUrl = "https://stgeo01/arcgis/rest/services/IGIS/IGIS_Sites/MapServer/0";
+                
                 //add the points in on demand mode. Note that an info template has been defined so when
                 //selected features are clicked a popup window will appear displaying the content defined in the info template.
-                var featureLayer = new FeatureLayer(
-                        "https://stgeo01/arcgis/rest/services//Indigo/v_gis_station_selex/MapServer/0",
-                        {  outFields : [ "user_id", "active_guid","stat_id",
-                                    "stat_code", "stat_name","offerer_id", "region_id", 
-                                    "ground_level", "cell_types", "offerer_type", "services", "supplies" ]
+                var featureLayer = new FeatureLayer(mapServiceUrl,
+                        {  outFields : [ "STAT_ID", "STAT_CODE", "STAT_NAME","OFFERER_ID", "LON", "LAT", "REGION_ID", 
+      "GROUND_LEVEL", "CREA_DATE", "OFFERER_TYPE", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ]
                         });
 
-                var queryTask = new esri.tasks.QueryTask(
-                        "https://stgeo01/arcgis/rest/services//Indigo/v_gis_station_selex/MapServer/0");
+                var queryTask = new esri.tasks.QueryTask(mapServiceUrl);
                 //build query filter
                 var query = new esri.tasks.Query();
                 query.returnGeometry = true;

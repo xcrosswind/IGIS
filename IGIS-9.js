@@ -1,6 +1,6 @@
 /*
  * IGIS-9 die Suchresultate der Indigo-Standortsuche im GIS sehen (Ptyp)
- * Tobias
+ * IGIS-144 - vom Indigo GIS aus im Indigo GUI die Detailansicht zu einem Standort öffnen (analog Indigo Detail-Knopf) (Ptyp)
  */
 
 var map;
@@ -19,14 +19,30 @@ require([
   , "esri/symbols/SimpleLineSymbol"
   , "esri/symbols/SimpleFillSymbol"
   , "esri/renderers/SimpleRenderer"
+  , "esri/dijit/Search"
+  , "esri/dijit/BasemapGallery"
+  
   , "esri/config"
+  
+  , "dijit/TooltipDialog"
+  , "esri/lang"
+  , "dojo/dom-style"
+  , "dijit/popup"
   , "esri/Color"
   , "esri/geometry/Point"
+  
+  , "esri/arcgis/utils"
+  
+  , "dojo/parser"
   , "dojo/dom"
   , "dojo/on"
+  
+  , "dijit/layout/BorderContainer"
+  , "dijit/layout/ContentPane"
+  , "dijit/TitlePane"
   , "dojo/domReady!"
-  , "esri/arcgis/utils"
-  , "esri/dijit/Legend" 
+
+  
 ], function(urlUtils
   , Map
   , FeatureLayer
@@ -40,54 +56,130 @@ require([
   , SimpleLineSymbol
   , SimpleFillSymbol
   , SimpleRenderer
+  , Search  
+  , BasemapGallery
   , esriConfig
+  , TooltipDialog
+  , esriLang
+  , domStyle
+  , dijitPopup
   , Color
   , Point
+  , arcgisUtils
+  , parser
   , dom
   , on
-  , arcgisUtils
-  , Legend
+
 ) {
-'use strict';
-
-// create map
-map = new Map("mapDiv", {
-  basemap : "streets",
-  slider : true
-});
-                
-                
-var mapServiceUrl = "https://stgeo01/arcgis/rest/services/IGIS/IGIS_Sites_Userselection/MapServer/0";
-
-//add the points in on demand mode. Note that an info template has been defined so when
-//selected features are clicked a popup window will appear displaying the content defined in the info template.
-var featureLayer = new FeatureLayer(
-  mapServiceUrl,
-  {
-    infoTemplate : new InfoTemplate("Block: ${BLOCK}", "${*}"),
-    outFields : [ "USER_ID", "ACTIVE_GUID", "STAT_ID", "STAT_CODE",
-        "STAT_NAME", "LON", "LAT", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ]
+  'use strict';
+  
+  // create map
+  map = new Map("map", {
+    basemap : "streets",
+    slider : true
   });
-
-var queryTask = new QueryTask(mapServiceUrl);
-//build query filter
-var query = new Query();
-query.returnGeometry = true;
-query.outFields = [ "USER_ID", "ACTIVE_GUID", "STAT_ID", "STAT_CODE", "STAT_NAME", "LON", "LAT" ];
-        
-// Die URL liefert die user_id und die active_guid. Damit können die beiden Parameter aus der URL ausgelesen werden.
-// das Package esri/urlUtils muss als erstes aufgeführt werden. Warum ist unklar.
-var url = urlUtils.urlToObject(document.location.href);
-
-query.where = "user_id = " + url.query['user_id'] + " AND active_guid = '" + url.query['active_guid'] + "'"; // hier SQL WHERE Clause definieren
-//query.where = "USER_ID = " + url.query.user_id + " AND ACTIVCE_GUID = '" + url.query.active_guid + "'";  // diese Version funktioniert nicht. Warum?
-                          
-// Mit setDefinitionExpression wird erreicht, dass nur Objekte geladen werden, die auch wirklich benötigt werden. 
-// In diesem Fall nur Objekte, die in der URL explizit genannt werden.
-featureLayer.setDefinitionExpression(query.where);        
-
-queryTask.execute(query, showResults);
-
+  
+  //add the basemap gallery, in this case we'll display maps from ArcGIS.com including bing maps
+  var basemapGallery = new BasemapGallery({
+    showArcGISBasemaps: true,
+    map: map
+  }, "basemapGallery");
+  basemapGallery.startup();
+                  
+  basemapGallery.on("error", function(msg) {
+    console.log("basemap gallery error:  ", msg);
+  });
+           
+  // add search field
+  var search = new Search({
+    map: map
+    }, "search");
+  search.startup();
+                             
+  var mapServiceUrl = "https://stgeo01/arcgis/rest/services/IGIS/IGIS_Sites_Userselection/MapServer/0";
+  
+  //add the points in on demand mode. Note that an info template has been defined so when
+  //selected features are clicked a popup window will appear displaying the content defined in the info template.
+  var featureLayer = new FeatureLayer(
+    mapServiceUrl,
+    {
+      infoTemplate : new InfoTemplate("Block: ${BLOCK}", "${*}"),
+      outFields : [ "USER_ID", "ACTIVE_GUID", "STAT_ID", "STAT_CODE",
+          "STAT_NAME", "LON", "LAT", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ]
+    });
+  
+  var queryTask = new QueryTask(mapServiceUrl);
+  //build query filter
+  var query = new Query();
+  query.returnGeometry = true;
+  query.outFields = [ "USER_ID", "ACTIVE_GUID", "STAT_ID", "STAT_CODE", "STAT_NAME", "LON", "LAT" ];
+          
+  // Die URL liefert die user_id und die active_guid. Damit können die beiden Parameter aus der URL ausgelesen werden.
+  // das Package esri/urlUtils muss als erstes aufgeführt werden. Warum ist unklar.
+  var url = urlUtils.urlToObject(document.location.href);
+  
+  query.where = "user_id = " + url.query['user_id'] + " AND active_guid = '" + url.query['active_guid'] + "'"; // hier SQL WHERE Clause definieren
+  //query.where = "USER_ID = " + url.query.user_id + " AND ACTIVCE_GUID = '" + url.query.active_guid + "'";  // diese Version funktioniert nicht. Warum?
+                            
+  // Mit setDefinitionExpression wird erreicht, dass nur Objekte geladen werden, die auch wirklich benötigt werden. 
+  // In diesem Fall nur Objekte, die in der URL explizit genannt werden.
+  featureLayer.setDefinitionExpression(query.where);        
+  
+  queryTask.execute(query, showResults);
+  
+  
+  // --- Mouseover Window
+  map.infoWindow.resize(245,125); 
+  
+  var dialog = new TooltipDialog({
+    id: "tooltipDialog",
+    style: "position: absolute; width: 250px; font: normal normal normal 10pt Helvetica;z-index:100"
+  });
+  dialog.startup();
+  
+  //close the dialog when the mouse leaves the highlight graphic
+  map.on("load", function(){
+    map.graphics.enableMouseEvents();
+    map.graphics.on("mouse-out", closeDialog);             
+  });
+                     
+  //listen for when the onMouseOver event fires on the countiesGraphicsLayer
+  //when fired, create a new graphic with the geometry from the event.graphic and add it to the maps graphics layer
+  featureLayer.on("mouse-over", function(evt){
+    var host = "http://sdshgweb01:9010"; // muss wahrscheinlich noch irgendwie dynamisch gesetzt werden, um zwischen extern und intern unterscheiden zu können    
+    var t = "<b>STAT_CODE: </b>${STAT_CODE}<br>"
+      + "<b>STAT_NAME: </b>${STAT_NAME}<br>"
+      + "<b>IS_GSM: </b>${IS_GSM}<br>"
+      + "<b>IS_DCS: </b>${IS_DCS}<br>"
+      + "<b>IS_UMTS: </b>${IS_UMTS}<br>"
+      + "<b>IS_LTE: </b>${IS_LTE}<br>"
+      + "<b>IS_OUTD: </b>${IS_OUTD}<br>"
+      + "<b>IS_INHOUS: </b>${IS_INHOUS}<br>"
+      + "<b>IS_TUNNEL: </b>${IS_TUNNEL}<br>"
+      + "<a href= '" + host + "/Indigo/Station/Detail/${STAT_ID}' target='_blank'>Link auf Indigo Details</a><br>";
+    
+  // setze den Inhalt im Mouseover-Fenster
+  var content = esriLang.substitute(evt.graphic.attributes,t);         
+  dialog.setContent(content);
+  
+  domStyle.set(dialog.domNode, "opacity", 0.65);
+  dijitPopup.open({
+    popup: dialog, 
+    x: evt.pageX,
+    y: evt.pageY
+    });
+  });
+          
+  function closeDialog() {
+    map.graphics.clear();
+    dijitPopup.close(dialog);
+  }
+  
+  var unselectSymbol = new SimpleMarkerSymbol().setSize(0);
+  featureLayer.setRenderer(new SimpleRenderer(unselectSymbol));
+    // -- END Mouseover Window  
+    
+    
   function showResults(featureSet) {
     featureLayer.selectFeatures(query,
     FeatureLayer.SELECTION_NEW, function(featureSet) {
@@ -128,7 +220,7 @@ queryTask.execute(query, showResults);
         //make unselected features invisible
         var nullSymbol = new SimpleMarkerSymbol().setSize(0);
           featureLayer.setRenderer(new SimpleRenderer(nullSymbol));
-   
-    map.addLayer(featureLayer);
+    
+        map.addLayer(featureLayer); 
   }
 });

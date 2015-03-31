@@ -1,5 +1,5 @@
 /*
- * IGIS-143 -  in der Indigo GUI-Detailansicht eines Standortes dessen Position auf einer Karte sehen (Ptyp)
+ * IGIS-143 - in der Indigo GUI-Detailansicht eines Standortes dessen Position auf einer Karte sehen (Ptyp)
  */
 
 var map;
