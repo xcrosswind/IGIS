@@ -1,6 +1,7 @@
 /*
  * IGIS-9 die Suchresultate der Indigo-Standortsuche im GIS sehen (Ptyp)
  * IGIS-144 - vom Indigo GIS aus im Indigo GUI die Detailansicht zu einem Standort öffnen (analog Indigo Detail-Knopf) (Ptyp)
+ * IGIS-145 - für Standorte mit Mouseover die relevantesten Kennzahlen sehen (Ptyp)
  */
 
 var map;
