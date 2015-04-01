@@ -20,6 +20,7 @@ require([
   , "esri/Color"
   , "esri/geometry/Point"
   , "esri/tasks/FeatureSet"
+  , "esri/geometry/webMercatorUtils"
 
   , "esri/arcgis/utils"
 
@@ -42,6 +43,7 @@ require([
   , Color
   , Point
   , FeatureSet
+  , webMercatorUtils
 
   , arcgisUtils
 
@@ -62,11 +64,12 @@ require([
      
   var mapServiceUrl = "https://stgeo01/arcgis/rest/services/IGIS/IGIS_Sites/MapServer/0";
 
+
   //add the points in on demand mode. Note that an info template has been defined so when
   //selected features are clicked a popup window will appear displaying the content defined in the info template.
   var featureLayer = new FeatureLayer(
     mapServiceUrl,
-    {  outFields : ["STAT_ID", "STAT_CODE", "STAT_NAME","OFFERER_ID", "LON", "LAT", "REGION_ID", 
+    {  outFields : ["STAT_ID", "STAT_CODE", "STAT_NAME","OFFERER_ID", "XCOORD", "YCOORD", "REGION_ID", 
       "GROUND_LEVEL", "CREA_DATE", "OFFERER_TYPE", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ]
   });
   
@@ -74,7 +77,7 @@ require([
   var queryTask = new QueryTask(mapServiceUrl);
   var query = new Query();
   query.returnGeometry = true;
-  query.outFields = ["STAT_ID", "STAT_CODE", "LON", "LAT" ];
+  query.outFields = ["STAT_ID", "STAT_CODE", "XCOORD", "YCOORD" ];
   
   // das Package esri/urlUtils muss als erstes aufgeführt werden. Warum ist unklar.
   // !!! Besser wäre, wenn nur die wirklich benötigten Punkte geladen würden, anstelle von alles laden und nur die benötigten darstellen...
@@ -97,10 +100,10 @@ require([
 
     // pan and zoom to object
     // identifiziere die Koordinaten aus dem Objekt
-    var pos_long = featureSet.features[0].attributes.LON, 
-      pos_lat = featureSet.features[0].attributes.LAT;
+    var pos_x = featureSet.features[0].attributes.XCOORD, 
+      pos_y = featureSet.features[0].attributes.YCOORD;
 
-    map.centerAndZoom(new Point(pos_long, pos_lat), 16);   // welche Zoomstufe sinnvoll ist, muss noch mit den Anwendern diskutiert werden
+   map.centerAndZoom(featureSet.features[0].geometry, 16);
 
     // selection symbol used to draw the selected points within the buffer polygon
     var symbol = new SimpleMarkerSymbol(

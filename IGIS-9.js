@@ -22,6 +22,7 @@ require([
   , "esri/symbols/SimpleLineSymbol"
   , "esri/symbols/SimpleFillSymbol"
   , "esri/renderers/SimpleRenderer"
+  , "esri/geometry/Extent"
   , "esri/dijit/Search"
   , "esri/dijit/BasemapGallery"
   , "esri/units"
@@ -65,6 +66,7 @@ require([
   , SimpleLineSymbol
   , SimpleFillSymbol
   , SimpleRenderer
+  , Extent
   , Search  
   , BasemapGallery
   , Units
@@ -155,16 +157,15 @@ require([
   var featureLayer = new FeatureLayer(mapServiceUrl, {
     infoTemplate: template,
     outFields : [ "USER_ID", "ACTIVE_GUID", "STAT_ID", "STAT_CODE",
-          "STAT_NAME", "LON", "LAT", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ]
+          "STAT_NAME", "XCOORD", "YCOORD", "IS_GSM", "IS_DCS", "IS_UMTS", "IS_LTE", "IS_OUTD", "IS_INHOUS", "IS_TUNNEL" ]
   });
   // -- end featureLayer
-  
   
   // query data based on Map Service URL parameters
   var queryTask = new QueryTask(mapServiceUrl);
   var query = new Query();
   query.returnGeometry = true;
-  query.outFields = [ "USER_ID", "ACTIVE_GUID", "STAT_ID", "STAT_CODE", "STAT_NAME", "LON", "LAT" ];
+  query.outFields = [ "USER_ID", "ACTIVE_GUID", "STAT_ID", "STAT_CODE", "STAT_NAME", "XCOORD", "YCOORD" ];
 
   var url = urlUtils.urlToObject(document.location.href);
   
@@ -174,31 +175,12 @@ require([
   featureLayer.setDefinitionExpression(query.where);
   queryTask.execute(query, showResults);
   
+
+  
   
     function showResults(featureSet) {
     // pan and zoom to objects (median of coordinates, to omit points (Dachsen Thšrishausen))
-    function median(values) {
-      values.sort( function(a,b) {return a - b;} );
-   
-      var half = Math.floor(values.length/2);
-   
-      if(values.length % 2)
-        return values[half];
-      else
-        return (values[half-1] + values[half]) / 2.0;
-    }
-                      
-    var longs = [],
-      lats = [], 
-      i = 0;
-                      
-    for (i = 0; i < featureSet.features.length; i++) {
-      longs.push(featureSet.features[i].attributes.LON);
-      lats.push(featureSet.features[i].attributes.LAT);  
-    }
-    // hier mŸsste man noch leere Koordinaten abfangen
-                              
-    map.centerAndZoom(new Point(median(longs), median(lats)), 15);
+
                                
     // selection symbol used to draw the selected points within the buffer polygon
     var selectedSymbol = new SimpleMarkerSymbol(
@@ -215,12 +197,24 @@ require([
           new Color([ 255, 0, 0, 1 ]));
     featureLayer.setRenderer(new SimpleRenderer(nonselectedSymbol));
     
-    map.addLayer(featureLayer);
+  
+  // define extent
+  var features = featureSet.features || [];
+  var extent = esri.graphicsExtent(features); 
+  
+  if(!extent && features.length == 1) {
+    // esri.getExtent returns null for a single point, so we'll build the extent by hand
+    var point = features[0];
+    extent = new esri.geometry.Extent(point.x - 1, point.y - 1, point.x + 1, point.y + 1, point.SpatialReference);
   }
 
-
-
-
+  if(extent) {
+    // assumes the esri map object is stored in the globally-scoped variable 'map'
+    map.setExtent(extent)
+  }
+    
+    map.addLayer(featureLayer);
+  }
 
   //when the map is clicked create a buffer around the click point of the specified distance.        
   // Selection Circle
