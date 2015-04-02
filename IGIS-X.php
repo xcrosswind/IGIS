@@ -1,4 +1,4 @@
-<html>
+  <html>
 <body> 
 <?php
 // Connecting, selecting database
