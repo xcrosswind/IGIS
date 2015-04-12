@@ -39,7 +39,9 @@ function init() {
 	resultTemplate = new esri.InfoTemplate("City",
 			"<tr><td>${CITY_NAME}</tr></td>");
 
-	myResultTemplate = new esri.InfoTemplate("Attributes", "${CITY_NAME}");
+	myResultTemplate = new esri.InfoTemplate("Attributes", "${FID}");
+
+	sessionInitParameters();
 }
 
 // initialize drawing toolbar
@@ -61,6 +63,35 @@ function addPointsToMap(featureSet) {
 	});
 }
 
+function humanReadableTimeStamp() {
+	var now = new Date();
+	var date = [ now.getDate(), now.getMonth() + 1, now.getFullYear() ];
+	var time = [ now.getSeconds(), now.getMinutes(), now.getHours() ];
+
+	// Determine AM or PM suffix based on the hour
+	var suffix = (time[2] < 12) ? "AM" : "PM";
+	// Convert hour from military time
+	time[0] = (time[2] < 12) ? time[0] : time[0] - 12;
+	// If hour is 0, set it to 12
+	time[0] = time[2] || 12;
+	// If seconds and minutes are less than 10, add a zero
+	for (var i = 0; i < 2; i++) {
+		if (time[i] < 10) {
+			time[i] = "0" + time[i];
+		}
+	}
+	// If days and months are less than 10, add a zero
+	for (var i = 0; i < 2; i++) {
+		if (date[i] < 10) {
+			date[i] = "0" + date[i];
+		}
+	}
+	// goal: 2015-03-16 09:52:09
+	// return the formatted string
+	return date[2] + "-" + date[1] + "-" + date[0] + " " + time[2] + ":"
+			+ time[1] + ":" + time[0];
+}
+
 function post(userSelection) {
 	$.ajax({
 		type : 'post',
@@ -71,23 +102,39 @@ function post(userSelection) {
 	});
 }
 
+function sessionInitParameters() {
+	sessionStorage.clear();
+	// normally get it from url
+	var user_id = "5719", src_id = "1", active_guid = "indigo";
+
+	sessionStorage.setItem('user_id', user_id);
+	sessionStorage.setItem('src_id', src_id);
+	sessionStorage.setItem('active_guid', active_guid);
+}
+
+function sessionIncNumSelections() {
+	if (sessionStorage.getItem('numSelections')) {
+		sessionStorage.setItem('numSelections', Number(sessionStorage
+				.getItem('numSelections')) + 1);
+	} else {
+		sessionStorage.setItem('numSelections', 1);
+	}
+	return sessionStorage.getItem('numSelections');
+}
+
 // find all points within argument extent
 function findPointsInExtent(extent) {
-	var results = [];
 	var userSelection = {};
 
-	results.push("5719"); // user_id
-	results.push("indigo"); // active_guid
-
-	userSelection.user_id = "5719";
-	userSelection.active_guid = "indigo";
-	userSelection.points = [];
+	userSelection.user_id = sessionStorage.getItem('user_id');
+	userSelection.src_id = sessionStorage.getItem('src_id');
+	userSelection.active_guid = sessionStorage.getItem('active_guid');
+	userSelection.objects = [];
 
 	dojo.forEach(map.graphics.graphics, function(graphic) {
 		if (extent.contains(graphic.geometry)) {
 			graphic.setSymbol(highlightSymbol);
-			results.push(graphic.getContent());
-			userSelection.points.push(graphic.getContent());
+			userSelection.objects.push(graphic.getContent());
 		}
 		// else if point was previously highlighted, reset its symbology
 		else if (graphic.symbol == highlightSymbol) {
@@ -95,17 +142,31 @@ function findPointsInExtent(extent) {
 		}
 	});
 
+	// increase selection counter
+	var numSelections = sessionIncNumSelections();
+
+	if (numSelections > 1) {
+		userSelection.actionType = 2;
+		userSelection.timestamp = sessionStorage.getItem('timestamp');
+	} else {
+		// this is the first selection in the session
+		userSelection.actionType = 1;
+		// generate timestamp of this user session
+		var timestamp = humanReadableTimeStamp();
+		// var timestamp = new Date();
+		sessionStorage.setItem('timestamp', timestamp);
+		userSelection.timestamp = timestamp;
+	}
+
+	// save last user selection
+	sessionStorage.setItem('objects', userSelection.objects);
+
 	// display number of points in extent
-	dojo.byId("inextent").innerHTML = results.length;
-
-	// display list of points in extent
-	dojo.byId("results").innerHTML = "<table><tbody>" + results.join("")
-			+ "</tbody></table>";
-
-	dojo.byId("results2").innerHTML = JSON.stringify(results);
+	dojo.byId("inextent").innerHTML = userSelection.objects.length;
+	dojo.byId("results").innerHTML = JSON.stringify(userSelection);
+	// dojo.byId("results").innerHTML = JSON.stringify(sessionStorage);
 
 	post(userSelection);
-
 }
 
 dojo.addOnLoad(init);
