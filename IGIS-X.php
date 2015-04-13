@@ -3,16 +3,22 @@ require_once "vendor/autoload.php";
 
 set_include_path ( '../../../igis' );
 require ('IGIS-settings.php');
+require ('Encryption_Module.php');
+
+$crypt = new encryption_class ();
 
 $config = new \Doctrine\DBAL\Configuration ();
 $connectionParams = array (
 		'dbname' => $db_name,
 		'user' => $db_user,
-		'password' => $db_pw,
+		// 'password' => $db_pw,
+		'password' => $crypt->decrypt ( $db_secret, $db_pw ),
 		'host' => $db_hostname,
 		'port' => $db_port,
 		'driver' => $db_driver 
 );
+// DEBUG ? error_log ( $connectionParams ["password"] . "\n", 3, $GLOBALS ["igis_access_log"] ) : null;
+
 // connect to database
 $db = \Doctrine\DBAL\DriverManager::getConnection ( $connectionParams, $config );
 
@@ -45,7 +51,7 @@ if ($actionType == 1) {
 function insertIntoSelex() {
 	$queryBuilder = $GLOBALS ["db"]->createQueryBuilder ();
 	
-	$queryBuilder->insert ( $GLOBALS ["db_schema"] . "." . $GLOBALS ["db_x_selex"] );
+	$queryBuilder->insert ( $GLOBALS ["db_schema"] . "." . $GLOBALS ["db_x_selex"] ); // TODO: check this for Orcale!
 	$queryBuilder->values ( array (
 			'user_id' => '?',
 			'src_id' => '?',
@@ -72,7 +78,7 @@ function getSelexId() {
 	$queryBuilder = $GLOBALS ["db"]->createQueryBuilder ();
 	
 	$queryBuilder->select ( 'selex_id' );
-	$queryBuilder->from ( $GLOBALS ["db_schema"] . "." . $GLOBALS ["db_x_selex"] );
+	$queryBuilder->from ( $GLOBALS ["db_schema"] . "." . $GLOBALS ["db_x_selex"] ); // TODO: check this for Orcale!
 	$queryBuilder->where ( 'user_id = ?' );
 	$queryBuilder->andwhere ( 'src_id = ?' );
 	$queryBuilder->andwhere ( 'time_stamp = ?' );
@@ -100,7 +106,7 @@ function addSelexData($selex_id, $objects) {
 	$queryBuilder = $GLOBALS ["db"]->createQueryBuilder ();
 	
 	foreach ( $objects as $o ) {
-		$queryBuilder->insert ( $GLOBALS ["db_schema"] . "." . $GLOBALS ["db_x_selexdata"] );
+		$queryBuilder->insert ( $GLOBALS ["db_schema"] . "." . $GLOBALS ["db_x_selexdata"] ); // TODO: check this for Orcale!
 		$queryBuilder->values ( array (
 				'selex_id' => '?',
 				'obj_id' => '?' 
@@ -118,7 +124,7 @@ function addSelexData($selex_id, $objects) {
 function delSelexData($selex_id) {
 	$queryBuilder = $GLOBALS ["db"]->createQueryBuilder ();
 	
-	$queryBuilder->delete ( $GLOBALS ["db_schema"] . "." . $GLOBALS ["db_x_selexdata"] );
+	$queryBuilder->delete ( $GLOBALS ["db_schema"] . "." . $GLOBALS ["db_x_selexdata"] ); // TODO: check this for Orcale!
 	$queryBuilder->where ( 'selex_id = ?' );
 	$queryBuilder->setParameter ( 0, $selex_id );
 	
