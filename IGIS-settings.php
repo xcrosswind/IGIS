@@ -6,17 +6,25 @@ $db_name = 'Web';
 $db_schema = 'bto_shogun';
 $db_x_selex = 'x_selex';
 $db_x_selexdata = 'x_selexdata';
-$db_user = 'postgres';
-$db_pw = 'postgres';
+$db_user = 'tbd';
+$db_pw_plain = 'tbd';
+$db_pw = 'tbd';
+
 $db_driver = 'pdo_pgsql';
 
+$db_secret = 'tbd';
+
 // Indigo DB Development
+
 // $db_hostname = 'tbd';
+// $db_ip = 'tbd';
 // $db_port = 'tbd';
 // $db_name = 'tbd';
-// $db_schema = 'tbd';
+// $db_schema = 'tbd'; // TODO: check if necessary for Oracle!
 // $db_user = 'tbd';
+// $db_pw_plain = 'tbd';
 // $db_pw = 'tbd';
+
 // $db_driver = 'pdo_oci';
 
 // logging
