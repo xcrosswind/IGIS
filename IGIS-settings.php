@@ -1,18 +1,14 @@
 <?php
-// Test DB
+// Test DB (localhost Christoph's Rechner)
+
 $db_hostname = 'localhost';
 $db_port = '5432';
 $db_name = 'Web';
 $db_schema = 'bto_shogun';
-$db_x_selex = 'x_selex';
-$db_x_selexdata = 'x_selexdata';
 $db_user = 'tbd';
 $db_pw_plain = 'tbd';
 $db_pw = 'tbd';
-
 $db_driver = 'pdo_pgsql';
-
-$db_secret = 'tbd';
 
 // Indigo DB Development
 
@@ -24,8 +20,11 @@ $db_secret = 'tbd';
 // $db_user = 'tbd';
 // $db_pw_plain = 'tbd';
 // $db_pw = 'tbd';
-
 // $db_driver = 'pdo_oci';
+
+$db_secret = 'tbd';
+$db_x_selex = 'x_selex';
+$db_x_selexdata = 'x_selexdata';
 
 // logging
 define ( 'DEBUG', true );
