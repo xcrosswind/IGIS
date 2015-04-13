@@ -1,0 +1,41 @@
+#map {
+    height: 305px;
+    width: 1016px; 
+    position: absolute;
+    left: 0px;
+    top: 0px;
+} 
+
+#legend {
+    background-color: #fff;
+    position: absolute !important;
+    z-index: 99;
+    top: 10px;
+    right: 20px;
+}
+
+#messages {
+    background-color: #fff;
+    box-shadow: 0 0 5px #888;
+    font-size: 1.1em;
+    max-width: 15em;
+    padding: 0.5em;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 40;
+}
+#search {
+         display: block;
+         position: absolute;
+         z-index: 2;
+         top: 20px;
+         left: 74px; 
+}
+
+#BasemapToggle {
+      position: absolute;
+      top: 20px;
+      left: 916px;
+      z-index: 2;
+}
