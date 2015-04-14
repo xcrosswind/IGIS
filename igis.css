@@ -1,10 +1,42 @@
+html, body {
+      padding: 0px;
+      margin:0px;
+      top: 0px;
+      left: 0px; 
+    }
+    
+#mapContainer {
+  position: relative;
+    }
+
 #map {
-    height: 305px;
-    width: 1016px; 
-    position: absolute;
-    left: 0px;
-    top: 0px;
-} 
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%; 
+}
+
+#search {
+  position: absolute;
+  z-index: 2;
+  top: 20px;
+  left: 74px; 
+}
+
+#BasemapToggle {
+  z-index: 50;
+  position: absolute;
+  height: 79px;
+  width: 79px; 
+  top: 20px;
+  right: 20px; 
+
+    }
+
+
+
+
 
 #legend {
     background-color: #fff;
@@ -25,17 +57,6 @@
     top: 20px;
     z-index: 40;
 }
-#search {
-         display: block;
-         position: absolute;
-         z-index: 2;
-         top: 20px;
-         left: 74px; 
-}
 
-#BasemapToggle {
-      position: absolute;
-      top: 20px;
-      left: 916px;
-      z-index: 2;
-}
+
+
