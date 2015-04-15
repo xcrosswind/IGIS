@@ -10,12 +10,12 @@ require(
 		[ "esri/urlUtils", "esri/map", "esri/layers/FeatureLayer",
 				"esri/tasks/query", "esri/tasks/QueryTask",
 				"esri/geometry/Geometry", "esri/geometry/Circle",
-				"esri/graphic", "esri/InfoTemplate", "esri/dijit/Popup",
+				"esri/graphic", "esri/InfoTemplate", "esri/dijit/Popup", "esri/dijit/BasemapToggle",
 				"esri/dijit/PopupTemplate", "esri/symbols/SimpleMarkerSymbol",
 				"esri/symbols/SimpleLineSymbol",
 				"esri/symbols/SimpleFillSymbol",
 				"esri/renderers/SimpleRenderer", "esri/geometry/Extent",
-				"esri/dijit/Search", "esri/dijit/BasemapGallery", "esri/units"
+				"esri/dijit/Search", "esri/units"
 
 				, "esri/config"
 
@@ -33,9 +33,9 @@ require(
 
 		],
 		function(urlUtils, Map, FeatureLayer, Query, QueryTask, Geometry,
-				Circle, Graphic, InfoTemplate, Popup, PopupTemplate,
+				Circle, Graphic, InfoTemplate, Popup, BasemapToggle, PopupTemplate,
 				SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol,
-				SimpleRenderer, Extent, Search, BasemapGallery, Units,
+				SimpleRenderer, Extent, Search, Units,
 				esriConfig, TooltipDialog, esriLang, domStyle, dijitPopup,
 				Color, Point, arcgisUtils, parser, dom, domConstruct, on,
 				domClass
@@ -90,18 +90,12 @@ require(
 				infoWindow : popup
 			});
 
-			// add basemap gallery, in this case we'll display maps from
-			// ArcGIS.com including bing maps
-			var basemapGallery = new BasemapGallery({
-				showArcGISBasemaps : true,
-				map : map
-			}, "basemapGallery");
-			basemapGallery.startup();
+      var toggle = new BasemapToggle({
+        map: map,
+        basemap: "hybrid"
+      }, "BasemapToggle");
+      toggle.startup();
 
-			basemapGallery.on("error", function(msg) {
-				console.log("basemap gallery error:  ", msg);
-			});
-			// -- end basemap
 
 			// add search field
 			var search = new Search({
@@ -145,46 +139,44 @@ require(
 			sessionStorage.setItem('src_id', src_id);
 			sessionStorage.setItem('active_guid', url.query['active_guid']);
 
+			
+			
 			function showResults(featureSet) {
-				// pan and zoom to objects (median of coordinates, to omit
-				// points (Dachsen Th�rishausen))
+                              
+    // selection symbol used to draw the selected points within the buffer polygon
+    var selectedSymbol = new SimpleMarkerSymbol(
+      SimpleMarkerSymbol.STYLE_CIRCLE, 14,
+      new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL,
+        new Color([ 247, 34, 101, 0.9 ]), 1),
+          new Color([ 255, 0, 0, 1 ]));
+    featureLayer.setSelectionSymbol(selectedSymbol);
+        
+    var nonselectedSymbol = new SimpleMarkerSymbol(
+      SimpleMarkerSymbol.STYLE_CIRCLE, 7,
+      new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL,
+        new Color([ 247, 34, 101, 0.9 ]), 1),
+          new Color([ 255, 0, 0, 1 ]));
+    featureLayer.setRenderer(new SimpleRenderer(nonselectedSymbol));
+    
+  
+    // define extent
+    var features = featureSet.features || [];
+    var extent = esri.graphicsExtent(features); 
+    
+    if( features.length == 1) { 
+      // esri.getExtent returns null for a single point, so we'll build the extent by hand
+     
+      var point = features[0];
+      extent = new Extent(point.geometry.x - 500, point.geometry.y - 500, point.geometry.x + 500, point.geometry.y + 500, point.geometry.spatialReference);
+    }
 
-				// selection symbol used to draw the selected points within the
-				// buffer polygon
-				var selectedSymbol = new SimpleMarkerSymbol(
-						SimpleMarkerSymbol.STYLE_CIRCLE, 14,
-						new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL,
-								new Color([ 247, 34, 101, 0.9 ]), 1),
-						new Color([ 255, 0, 0, 1 ]));
-				featureLayer.setSelectionSymbol(selectedSymbol);
-
-				var nonselectedSymbol = new SimpleMarkerSymbol(
-						SimpleMarkerSymbol.STYLE_CIRCLE, 7,
-						new SimpleLineSymbol(SimpleLineSymbol.STYLE_NULL,
-								new Color([ 247, 34, 101, 0.9 ]), 1),
-						new Color([ 255, 0, 0, 1 ]));
-				featureLayer.setRenderer(new SimpleRenderer(nonselectedSymbol));
-
-				// define extent
-				var features = featureSet.features || [];
-				var extent = esri.graphicsExtent(features);
-
-				if (!extent && features.length == 1) {
-					// esri.getExtent returns null for a single point, so we'll
-					// build the extent by hand
-					var point = features[0];
-					extent = new esri.geometry.Extent(point.x - 1, point.y - 1,
-							point.x + 1, point.y + 1, point.SpatialReference);
-				}
-
-				if (extent) {
-					// assumes the esri map object is stored in the
-					// globally-scoped variable 'map'
-					map.setExtent(extent)
-				}
-
-				map.addLayer(featureLayer);
-			}
+    if(extent) {
+      // assumes the esri map object is stored in the globally-scoped variable 'map'
+      map.setExtent(extent) // vergroessere den Extent ein wenig
+    }
+    
+    map.addLayer(featureLayer);
+  }
 
 			// when the map is clicked create a buffer around the click point of
 			// the specified distance.
@@ -202,7 +194,7 @@ require(
 				circle = new Circle({
 					center : evt.mapPoint,
 					geodesic : true,
-					radius : 100, // Default Value: Meters
+					radius : 500, // Default Value: Meters
 					radiusUnit : Units.METERS
 				});
 				map.graphics.clear();

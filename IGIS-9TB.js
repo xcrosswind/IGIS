@@ -222,7 +222,7 @@ require([
 
     if(extent) {
       // assumes the esri map object is stored in the globally-scoped variable 'map'
-      map.setExtent(extent.expand(2)) // vergroessere den Extent ein wenig
+      map.setExtent(extent) // vergroessere den Extent ein wenig
     }
     
     map.addLayer(featureLayer);
