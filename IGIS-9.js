@@ -59,7 +59,7 @@ require(
 			// gesetzt werden, um
 			// zwischen extern und
 			// intern unterscheiden zu
-			// k�nnen
+			// koennen
 			var infoDescription = "<b>STAT_CODE: </b>${STAT_CODE}<br>"
 					+ "<b>STAT_ID: </b>{STAT_ID}<br>"
 					+ "<b>STAT_NAME: </b>{STAT_NAME}<br>"
@@ -72,7 +72,7 @@ require(
 					+ "<b>IS_TUNNEL: </b>{IS_TUNNEL}<br>"
 					+ "<a href= '"
 					+ host
-					+ "/Indigo/Station/Detail/{STAT_ID}' target='_blank'>Link auf Indigo Details</a><br>"
+					+ "/Indigo/Station/Detail/{STAT_ID}' target='_blank'>Link auf Indigo Details</a><br>";
 			var template = new PopupTemplate({
 				title : "STAT_NAME: {STAT_NAME}",
 				description : infoDescription,
