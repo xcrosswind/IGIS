@@ -4,7 +4,7 @@
  * IGIS-145 - für Standorte mit Mouseover die relevantesten Kennzahlen sehen (Ptyp)
  */
 
-var map;
+var map, template;
 
 require(
 		[ "esri/urlUtils", "esri/map", "esri/layers/FeatureLayer",
@@ -47,12 +47,15 @@ require(
 			var fill = new SimpleFillSymbol("solid", null, new Color("#A4CE67"));
 			var popup = new Popup({
 				fillSymbol : fill,
-				titleInBody : false,
-				visibleWhenEmpty : false, // warum funktioniert das nicht? Ich
-				// will eigentlich, dass ein leeres
-				// Popup nicht gezeigt wird
-				hideDelay : 0
+				titleInBody : false
 			}, domConstruct.create("div"));
+
+      // create map
+      map = new Map("map", {
+        basemap : "streets",
+        slider : true,
+        infoWindow : popup
+      });
 
 			var host = "http://sdshgweb01:9010"; // muss wahrscheinlich noch
 			// irgendwie dynamisch
@@ -73,9 +76,10 @@ require(
 					+ "<a href= '"
 					+ host
 					+ "/Indigo/Station/Detail/{STAT_ID}' target='_blank'>Link auf Indigo Details</a><br>";
-			var template = new PopupTemplate({
+
+			template = new PopupTemplate({
 				title : "STAT_NAME: {STAT_NAME}",
-				description : infoDescription,
+				description : infoDescription
 			/*
 			 * fieldInfos: [{ //define field infos so we can specify an alias
 			 * fieldName: "STAT_ID", label: "STAT_ID" }, { fieldName: "IS_LTE",
@@ -83,12 +87,7 @@ require(
 			 */
 			});
 
-			// create map
-			map = new Map("map", {
-				basemap : "streets",
-				slider : true,
-				infoWindow : popup
-			});
+
 
       var toggle = new BasemapToggle({
         map: map,
@@ -198,7 +197,6 @@ require(
 					radiusUnit : Units.METERS
 				});
 				map.graphics.clear();
-				map.infoWindow.show();
 				var graphic = new Graphic(circle, circleSymb);
 				map.graphics.add(graphic);
 
