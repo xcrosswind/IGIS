@@ -103,8 +103,8 @@ function post(userSelection) {
 }
 
 function sessionInitParameters() {
-	sessionStorage.clear();
-	// normally get it from url
+	// sessionStorage.clear();
+	// normally get this from the url
 	var user_id = "5719", src_id = "1", active_guid = "indigo";
 
 	sessionStorage.setItem('user_id', user_id);
