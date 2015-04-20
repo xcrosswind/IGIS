@@ -1,4 +1,4 @@
-/*
+  /*
  * IGIS-9 die Suchresultate der Indigo-Standortsuche im GIS sehen (Ptyp)
  * IGIS-144 - vom Indigo GIS aus im Indigo GUI die Detailansicht zu einem Standort �ffnen (analog Indigo Detail-Knopf) (Ptyp)
  * IGIS-145 - für Standorte mit Mouseover die relevantesten Kennzahlen sehen (Ptyp)
@@ -207,7 +207,7 @@ require(
 				featureLayer.queryFeatures(query, selectInBuffer);
 			});
 
-			function post(userSelection) {
+	/*		function post(userSelection) {
 				$.ajax({
 					type : 'post',
 					url : 'IGIS-X.php', // TODO: agree on final name
@@ -215,9 +215,9 @@ require(
 						"userSelection" : JSON.stringify(userSelection)
 					}
 				});
-			}
+			}*/
 
-			function sessionIncNumSelections() {
+	/*		function sessionIncNumSelections() {
 				if (sessionStorage.getItem('numSelections')) {
 					sessionStorage
 							.setItem('numSelections', Number(sessionStorage
@@ -226,9 +226,9 @@ require(
 					sessionStorage.setItem('numSelections', 1);
 				}
 				return sessionStorage.getItem('numSelections');
-			}
+			}*/
 
-			function humanReadableTimeStamp() {
+/*			function humanReadableTimeStamp() {
 				var now = new Date();
 				var date = [ now.getDate(), now.getMonth() + 1,
 						now.getFullYear() ];
@@ -256,34 +256,38 @@ require(
 				// return the formatted string
 				return date[2] + "-" + date[1] + "-" + date[0] + " " + time[2]
 						+ ":" + time[1] + ":" + time[0];
-			}
+			}*/
 
 			function selectInBuffer(response) {
-				var feature, features = response.features, inBuffer = [], i = 0;
+				var feature, 
+				  features = response.features, 
+				  inBuffer = [], 
+				  i = 0;
 
 				// manage user selection
-				var userSelection = {};
+			/*	var userSelection = {};
 				userSelection.user_id = sessionStorage.getItem('user_id');
 				userSelection.src_id = sessionStorage.getItem('src_id');
 				userSelection.active_guid = sessionStorage
 						.getItem('active_guid');
-				userSelection.objects = [];
+				userSelection.objects = [];*/
+				
+				var selectedStatIds = [];
 
 				// filter out features that are not actually in buffer, since we
 				// got all points in the buffer's bounding box
 				for (i = 0; i < features.length; i++) {
 					feature = features[i];
 					if (circle.contains(feature.geometry)) {
-						inBuffer
-								.push(feature.attributes[featureLayer.objectIdField]);
+						inBuffer.push(feature.attributes[featureLayer.objectIdField]);
 
 						var attributes = feature.attributes;
-						userSelection.objects.push(attributes.STAT_ID);
+						selectedStatIds.push(feature.attributes.STAT_ID);	
 					}
 				}
 
 				// increase selection counter
-				var numSelections = sessionIncNumSelections();
+		/*		var numSelections = sessionIncNumSelections();
 
 				if (numSelections > 1) {
 					userSelection.actionType = 2;
@@ -299,33 +303,27 @@ require(
 				}
 
 				// save last user selection
-				sessionStorage.setItem('objects', userSelection.objects);
+				sessionStorage.setItem('objects', userSelection.objects); */
 
-				var query = new Query();
-				query.objectIds = inBuffer; // use a fast objectIds selection
-				// query (should not need to go to
-				// the server)
-				featureLayer
-						.selectFeatures(
-								query,
-								FeatureLayer.SELECTION_NEW,
-								function(results) {
-									console
-											.log("Anzahl Objekte: "
-													+ featureLayer
-															.getSelectedFeatures().length); // access
-									// to
-									// selected
-									// features
-									// via
-									// featureLayer
-									// selection
-									console
-											.log(featureLayer
-													.getSelectedFeatures()[0].attributes);
-								});
+				
+    var query = new Query();
+    query.objectIds = inBuffer;
+    // use a fast objectIds selection
+    // query (should not need to go to
+    // the server)
+    featureLayer.selectFeatures(query, FeatureLayer.SELECTION_NEW, function(results) {
+      console.log("Anzahl Objekte: " + featureLayer.getSelectedFeatures().length);
+      // access to selected features via featureLayer selection
+      console.log(selectedStatIds);
+      
+      // JavaScript-Funktion, die von Indigo bereitgestellt wird:
+      // der Parameter ist ein Array mit Stat_ID's (Matthias Fluehmann)
+      indigo.gis.showGisSelex(selectedStatIds);
+    });
+    
+     
 
 				// post: insert selection into Indigo DB
-				post(userSelection);
+/*				post(userSelection); */
 			}
 		});
